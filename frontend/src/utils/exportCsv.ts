@@ -15,11 +15,11 @@ function csvCell(value: string | number | null | undefined): string {
  *   プロジェクト名, プロジェクト説明, プロジェクトURL
  *   （空行）
  *   タスク名, タスク説明
- *   立候補者, メモ
- *   立候補者, メモ
+ *   分担者, メモ
+ *   分担者, メモ
  *   （空行）
  *   タスク2名, タスク2説明
- *   立候補者, メモ
+ *   分担者, メモ
  *   ...
  */
 export function buildBoardCsv(project: Project, tasks: Task[], boardUrl: string): string {

@@ -96,7 +96,7 @@ export default function TaskCard({
       <div className="flex flex-1 flex-wrap content-start gap-3">
         {task.notes.length === 0 ? (
           <p className="chalk-text-muted py-2 font-hand text-sm">
-            まだ立候補者はいません。最初の付箋を貼ろう！
+            まだ引き受ける人の登録はありません。最初の付箋を貼ろう！
           </p>
         ) : (
           task.notes.map((note) => (
@@ -105,17 +105,17 @@ export default function TaskCard({
         )}
       </div>
 
-      {/* 立候補ボタン */}
+      {/* 引き受けるボタン */}
       <div className="mt-4">
         <button
           type="button"
           onClick={() => onAddNote(task)}
           className="w-full rounded-lg border border-white/25 bg-white/5 py-2 font-hand text-white/90 transition-colors hover:bg-white/15"
         >
-          ＋ 立候補する
+          ＋ 引き受ける
         </button>
         <p className="chalk-text-muted mt-1 text-right text-xs font-hand">
-          立候補 {task.notes.length} 人
+          分担 {task.notes.length} 人
         </p>
       </div>
     </article>

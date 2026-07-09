@@ -16,7 +16,7 @@ export default function HomePage() {
       <div className="mx-auto max-w-2xl py-10 text-center">
         <h1 className="chalk-text font-chalk text-5xl sm:text-6xl">タスク分担掲示板</h1>
         <p className="chalk-text-muted mt-3 font-chalk text-xl">
-          黒板にタスクを書いて、付箋で立候補しよう
+          黒板にタスクを書いて、分担を付箋で貼っていこう
         </p>
 
         <p className="chalk-text-muted mx-auto mt-6 max-w-xl font-hand text-sm leading-relaxed">

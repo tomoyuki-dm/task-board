@@ -257,7 +257,7 @@ export default function BoardPage({ projectKey }: Props) {
       {/* ステータス行 */}
       <div className="chalk-text-muted mb-4 flex items-center gap-4 font-hand text-sm">
         <span>タスク {tasks.length} 件</span>
-        <span>立候補 {totalNotes} 件</span>
+        <span>分担登録 {totalNotes} 件</span>
         <button
           type="button"
           onClick={() => loadBoard()}
@@ -314,7 +314,7 @@ export default function BoardPage({ projectKey }: Props) {
       )}
       {dialog.kind === 'new-note' && (
         <NoteForm
-          heading="立候補する（付箋を貼る）"
+          heading="引き受ける（付箋を貼る）"
           submitLabel="付箋を貼る"
           submittingLabel="貼っています…"
           taskTitle={dialog.task.title}

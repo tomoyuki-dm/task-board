@@ -81,15 +81,17 @@ export const api = {
     })
   },
 
-  updateTask(id: number, input: EditTaskInput): Promise<Task> {
+  updateTask(id: number, projectKey: string, input: EditTaskInput): Promise<Task> {
     return request<Task>(`/api/tasks.php?id=${id}`, {
       method: 'PUT',
-      body: JSON.stringify(input),
+      body: JSON.stringify({ project: projectKey, ...input }),
     })
   },
 
-  deleteTask(id: number): Promise<{ ok: boolean; id: number }> {
-    return request(`/api/tasks.php?id=${id}`, { method: 'DELETE' })
+  deleteTask(id: number, projectKey: string): Promise<{ ok: boolean; id: number }> {
+    return request(`/api/tasks.php?id=${id}&project=${encodeURIComponent(projectKey)}`, {
+      method: 'DELETE',
+    })
   },
 
   // タスクの表示順を保存（orderedIds は表示したい順に並べたタスクID配列）
@@ -107,14 +109,16 @@ export const api = {
     })
   },
 
-  updateNote(id: number, input: EditNoteInput): Promise<Note> {
+  updateNote(id: number, projectKey: string, input: EditNoteInput): Promise<Note> {
     return request<Note>(`/api/notes.php?id=${id}`, {
       method: 'PUT',
-      body: JSON.stringify(input),
+      body: JSON.stringify({ project: projectKey, ...input }),
     })
   },
 
-  deleteNote(id: number): Promise<{ ok: boolean; id: number }> {
-    return request(`/api/notes.php?id=${id}`, { method: 'DELETE' })
+  deleteNote(id: number, projectKey: string): Promise<{ ok: boolean; id: number }> {
+    return request(`/api/notes.php?id=${id}&project=${encodeURIComponent(projectKey)}`, {
+      method: 'DELETE',
+    })
   },
 }

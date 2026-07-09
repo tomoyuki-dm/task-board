@@ -143,14 +143,15 @@ task-board/                 ← https://tomoyuki.org/task-board/
 | GET | `/api/projects.php?key={key}` | プロジェクト情報を取得（存在確認・名称表示用） |
 | GET | `/api/tasks.php?project={key}` | 指定プロジェクトのタスク一覧（付箋込み）＋プロジェクト情報 `{ project, tasks }` |
 | POST | `/api/tasks.php` | タスク作成 `{ project, title, description }`（先頭に追加） |
-| PUT | `/api/tasks.php?id={id}` | タスク編集 `{ title, description }` |
+| PUT | `/api/tasks.php?id={id}` | タスク編集 `{ project, title, description }` |
 | PUT | `/api/tasks.php?action=reorder` | 並び替え `{ project, order: [taskId, ...] }`（配列順に表示順を保存） |
-| DELETE | `/api/tasks.php?id={id}` | タスク削除（付箋もCASCADEで削除） |
-| POST | `/api/notes.php` | 付箋作成 `{ task_id, name, comment, color }` |
-| PUT | `/api/notes.php?id={id}` | 付箋編集 `{ name, comment, color }` |
-| DELETE | `/api/notes.php?id={id}` | 付箋削除 |
+| DELETE | `/api/tasks.php?id={id}&project={key}` | タスク削除（付箋もCASCADEで削除） |
+| POST | `/api/notes.php` | 付箋作成 `{ project, task_id, name, comment, color }` |
+| PUT | `/api/notes.php?id={id}` | 付箋編集 `{ project, name, comment, color }` |
+| DELETE | `/api/notes.php?id={id}&project={key}` | 付箋削除 |
 
 - タスク・付箋は必ずいずれかのプロジェクトに属します（プロジェクト削除で連動削除）。
+- **すべての変更系API（作成・編集・削除・並び替え）は `project`（プロジェクトキー）が必須**で、操作対象が本当にそのプロジェクトに属するかをサーバー側で検証します。キーを知らない第三者が連番IDを総当たりして他プロジェクトを改ざん・削除することを防ぎます。
 - 付箋の色（`color`）は `yellow` / `pink` / `blue` / `green` / `orange` / `purple` のいずれか。範囲外は `yellow` に丸めます。
 
 ---
@@ -160,9 +161,11 @@ task-board/                 ← https://tomoyuki.org/task-board/
 - **SQLインジェクション対策**: すべてのクエリで PDO のプレースホルダを使用。
 - **入力バリデーション**: 文字数上限（プロジェクト名100・プロジェクト説明500・タスクタイトル100・タスク説明500・付箋名前50・コメント200）と必須項目をサーバー側で厳格に強制。制御文字は除去。プロジェクトIDは英数字・ハイフンのみ・32文字以内の形式チェックを行う。
 - **XSS対策**: フロントは React で、React は描画時に自動でHTMLエスケープします。そのため JSON API 側では `htmlspecialchars` を**あえて掛けていません**（掛けると二重エスケープになり `&` が `&amp;` 等と表示崩れするため）。生データを保存し、表示層（React）でエスケープする構成です。もし将来この API を React 以外（エスケープしないクライアント）から直接HTMLに埋め込む場合は、その表示側でエスケープを行ってください。
-- **レート制限**: 同一IPからの POST/DELETE を一定時間内の回数で制限（`config.php` で調整）。ファイルベースの簡易実装です。
-- **認証なし・全操作オープン**: 仕様どおり誰でも削除できます。荒らしが問題になる場合の拡張余地として、「タスク削除だけ合言葉制にする」等を `config.php` + APIに追加できる構成にしてあります。
-- `config.php` / `bootstrap.php` / `.sql` 等へのブラウザからの直接アクセスは `.htaccess` で拒否しています（Apache想定）。
+- **アクセス制御（プロジェクト境界）**: 認証はありませんが、プロジェクトごとの推測困難なキー（URL）がアクセス境界を担います。**読み取り・書き込みのすべてでプロジェクトキーを必須とし**、変更系では操作対象（タスク・付箋）が本当にそのプロジェクトに属するかを `project_id` 条件で検証します。これにより、キーを知らない第三者が連番ID（`AUTO_INCREMENT`）を総当たりして他プロジェクトを破壊・改ざんすること（IDOR）を防いでいます。ボード**内**では仕様どおり誰でも自由に追加・編集・削除できます。
+- **レート制限**: 同一IPからの POST/PUT/DELETE を一定時間内の回数で制限（`config.php` で調整）。ファイルベースのベストエフォート実装で、分散攻撃には無力です。深刻な荒らしが出た場合は「削除だけ合言葉制にする」等の拡張余地を残しています。
+- **セキュリティヘッダ**: API応答に `X-Content-Type-Options: nosniff` を付与。`.htaccess`（mod_headers 有効時）で `X-Frame-Options: DENY`（クリックジャッキング対策）・`X-Content-Type-Options: nosniff`・`Referrer-Policy` を全体に付与します。
+- **DoS緩和**: 並び替えAPIは1リクエストあたりの件数に上限（1000件）を設けています。
+- `config.php` / `bootstrap.php` / `.sql` / `*.example.php` 等へのブラウザからの直接アクセスは `.htaccess` で拒否しています（Apache想定）。
 
 ---
 

@@ -88,17 +88,18 @@ export default function BoardPage({ projectKey }: Props) {
     [projectKey],
   )
 
-  const handleUpdateTask = useCallback(async (id: number, values: EditTaskInput) => {
-    const updated = await api.updateTask(id, values)
-    // notes は変わらないので既存を保持して title/description のみ差し替え
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? { ...t, title: updated.title, description: updated.description }
-          : t,
-      ),
-    )
-  }, [])
+  const handleUpdateTask = useCallback(
+    async (id: number, values: EditTaskInput) => {
+      const updated = await api.updateTask(id, projectKey, values)
+      // notes は変わらないので既存を保持して title/description のみ差し替え
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === id ? { ...t, title: updated.title, description: updated.description } : t,
+        ),
+      )
+    },
+    [projectKey],
+  )
 
   // タスクを1つ上/下へ移動（楽観的更新→保存、失敗時は元に戻す）
   const handleMoveTask = useCallback(
@@ -129,28 +130,34 @@ export default function BoardPage({ projectKey }: Props) {
     [projectKey],
   )
 
-  const handleCreateNote = useCallback(async (taskId: number, values: EditNoteInput) => {
-    const created = await api.createNote({ task_id: taskId, ...values })
-    setTasks((prev) =>
-      prev.map((t) => (t.id === created.task_id ? { ...t, notes: [...t.notes, created] } : t)),
-    )
-  }, [])
+  const handleCreateNote = useCallback(
+    async (taskId: number, values: EditNoteInput) => {
+      const created = await api.createNote({ project: projectKey, task_id: taskId, ...values })
+      setTasks((prev) =>
+        prev.map((t) => (t.id === created.task_id ? { ...t, notes: [...t.notes, created] } : t)),
+      )
+    },
+    [projectKey],
+  )
 
-  const handleUpdateNote = useCallback(async (id: number, values: EditNoteInput) => {
-    const updated = await api.updateNote(id, values)
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === updated.task_id
-          ? { ...t, notes: t.notes.map((n) => (n.id === id ? updated : n)) }
-          : t,
-      ),
-    )
-  }, [])
+  const handleUpdateNote = useCallback(
+    async (id: number, values: EditNoteInput) => {
+      const updated = await api.updateNote(id, projectKey, values)
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === updated.task_id
+            ? { ...t, notes: t.notes.map((n) => (n.id === id ? updated : n)) }
+            : t,
+        ),
+      )
+    },
+    [projectKey],
+  )
 
   const handleDeleteTask = useCallback(
     async (task: Task) => {
       try {
-        await api.deleteTask(task.id)
+        await api.deleteTask(task.id, projectKey)
         setTasks((prev) => prev.filter((t) => t.id !== task.id))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'タスクの削除に失敗しました。')
@@ -158,13 +165,13 @@ export default function BoardPage({ projectKey }: Props) {
         closeDialog()
       }
     },
-    [closeDialog],
+    [closeDialog, projectKey],
   )
 
   const handleDeleteNote = useCallback(
     async (note: Note) => {
       try {
-        await api.deleteNote(note.id)
+        await api.deleteNote(note.id, projectKey)
         setTasks((prev) =>
           prev.map((t) =>
             t.id === note.task_id ? { ...t, notes: t.notes.filter((n) => n.id !== note.id) } : t,
@@ -176,7 +183,7 @@ export default function BoardPage({ projectKey }: Props) {
         closeDialog()
       }
     },
-    [closeDialog],
+    [closeDialog, projectKey],
   )
 
   // --- プロジェクトが見つからない場合 ---

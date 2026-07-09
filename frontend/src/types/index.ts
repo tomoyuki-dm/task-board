@@ -51,6 +51,7 @@ export interface NewTaskInput {
 }
 
 export interface NewNoteInput {
+  project: string
   task_id: number
   name: string
   comment: string

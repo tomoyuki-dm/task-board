@@ -35,6 +35,9 @@ function apply_cors(): void
     header('Access-Control-Allow-Headers: Content-Type');
     header('Access-Control-Max-Age: 86400');
 
+    // レスポンスの MIME スニッフィングを禁止（JSONをHTMLと誤解釈させない）
+    header('X-Content-Type-Options: nosniff');
+
     // プリフライトはここで完了
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
         http_response_code(204);
@@ -189,4 +192,16 @@ function fetch_project_or_404(string $key): array
     }
     $project['id'] = (int)$project['id'];
     return $project;
+}
+
+/**
+ * リクエストからプロジェクトキーを取得し、実在するプロジェクトを返す。
+ * body（JSON）優先、無ければクエリ ?project= を見る。見つからなければ 404。
+ * ※ 変更系APIで「操作対象が本当にそのプロジェクトのものか」を必ず確認するために使う。
+ */
+function require_project_from_request(array $body): array
+{
+    $raw = $body['project'] ?? ($_GET['project'] ?? '');
+    $key = require_project_key($raw);
+    return fetch_project_or_404($key);
 }

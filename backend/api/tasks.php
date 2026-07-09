@@ -1,11 +1,16 @@
 <?php
 /**
  * タスク API（プロジェクト単位）
- *   GET    /api/tasks.php?project={key}      指定プロジェクトのタスク一覧（付箋込み）＋プロジェクト情報
- *   POST   /api/tasks.php                    タスク新規作成 { project, title, description }
- *   PUT    /api/tasks.php?id={id}            タスク編集 { title, description }
- *   PUT    /api/tasks.php?action=reorder     並び替え { project, order: [taskId, ...] }
- *   DELETE /api/tasks.php?id={id}            タスク削除（付箋も CASCADE で削除）
+ *   GET    /api/tasks.php?project={key}         指定プロジェクトのタスク一覧（付箋込み）＋プロジェクト情報
+ *   POST   /api/tasks.php                       タスク新規作成 { project, title, description }
+ *   PUT    /api/tasks.php?id={id}               タスク編集 { project, title, description }
+ *   PUT    /api/tasks.php?action=reorder        並び替え { project, order: [taskId, ...] }
+ *   DELETE /api/tasks.php?id={id}&project={key} タスク削除（付箋も CASCADE で削除）
+ *
+ * アクセス制御:
+ *   認証は無いが、操作対象が指定プロジェクト（秘密キー）に属することを必ず検証する。
+ *   これにより、キーを知らない第三者が連番IDを総当たりして他プロジェクトを
+ *   改ざん・削除することを防ぐ。
  *
  * XSS 対策方針:
  *   本 API のクライアントは React で、React は描画時に自動でエスケープする。
@@ -152,6 +157,10 @@ function handle_reorder_tasks(): void
     if (!is_array($order) || $order === []) {
         send_error('並び順の指定が不正です。', 422);
     }
+    // 過大な配列によるリソース消費を防ぐ上限
+    if (count($order) > 1000) {
+        send_error('並び順の件数が多すぎます。', 422);
+    }
 
     // 正の整数のみ・重複排除
     $ids = [];
@@ -192,6 +201,8 @@ function handle_update_task(): void
 {
     $id = require_positive_int($_GET['id'] ?? null);
     $body = read_json_body();
+    // 対象タスクが属するプロジェクト（秘密キー）を要求・検証する
+    $project = require_project_from_request($body);
 
     $title = clean_string($body['title'] ?? '');
     $description = clean_string($body['description'] ?? '');
@@ -207,18 +218,23 @@ function handle_update_task(): void
     }
 
     $pdo = db();
+    // project_id 条件で、当該プロジェクトのタスクだけを更新対象にする
     $stmt = $pdo->prepare(
-        'UPDATE tasks SET title = :title, description = :description WHERE id = :id'
+        'UPDATE tasks SET title = :title, description = :description
+         WHERE id = :id AND project_id = :pid'
     );
     $stmt->execute([
         ':title'       => $title,
         ':description' => $description === '' ? null : $description,
         ':id'          => $id,
+        ':pid'         => $project['id'],
     ]);
 
     // 変更が無くても（同じ内容の保存）成功扱いにするため、存在確認は SELECT で行う
-    $stmt = $pdo->prepare('SELECT id, title, description, created_at FROM tasks WHERE id = :id');
-    $stmt->execute([':id' => $id]);
+    $stmt = $pdo->prepare(
+        'SELECT id, title, description, created_at FROM tasks WHERE id = :id AND project_id = :pid'
+    );
+    $stmt->execute([':id' => $id, ':pid' => $project['id']]);
     $task = $stmt->fetch();
     if ($task === false) {
         send_error('該当するタスクが見つかりません。', 404);
@@ -231,10 +247,12 @@ function handle_update_task(): void
 function handle_delete_task(): void
 {
     $id = require_positive_int($_GET['id'] ?? null);
+    // 対象タスクが属するプロジェクト（秘密キー）を要求・検証する
+    $project = require_project_from_request([]);
 
     $pdo = db();
-    $stmt = $pdo->prepare('DELETE FROM tasks WHERE id = :id');
-    $stmt->execute([':id' => $id]);
+    $stmt = $pdo->prepare('DELETE FROM tasks WHERE id = :id AND project_id = :pid');
+    $stmt->execute([':id' => $id, ':pid' => $project['id']]);
 
     if ($stmt->rowCount() === 0) {
         send_error('該当するタスクが見つかりません。', 404);

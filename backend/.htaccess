@@ -8,6 +8,16 @@ Options -Indexes
 # UTF-8 をデフォルトに
 AddDefaultCharset UTF-8
 
+# セキュリティヘッダ（mod_headers があれば付与）
+<IfModule mod_headers.c>
+    # クリックジャッキング対策（iframe 埋め込み禁止）
+    Header always set X-Frame-Options "DENY"
+    # MIME スニッフィング禁止
+    Header always set X-Content-Type-Options "nosniff"
+    # リファラの外部漏洩を抑制
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
 # 機密ファイル・設定ファイルへの直接アクセスを拒否
 <FilesMatch "\.(sql|md|example\.php)$">
     Require all denied

@@ -95,6 +95,11 @@ task-board/
 
 ## 本番デプロイ（https://tomoyuki.org/task-board/）
 
+> **ドメインについて**: 以下では設置先の例として `https://tomoyuki.org/task-board/` を使っています。**`tomoyuki.org` の部分は、ご自分のドメインに読み替えてください。** ドメインを変える場合に実際に書き換えが必要なのは次の1か所だけです（他は同一オリジンの絶対パスなので変更不要）:
+> - `backend/api/config.php` の `CORS_ALLOWED_ORIGINS` … 自分のドメインを設定
+>
+> さらに設置パスを `/task-board/` 以外にする場合のみ、`frontend/vite.config.ts` の `base`、`frontend/.env.production` の `VITE_API_BASE`、`backend/.htaccess` の `RewriteBase` も合わせて変更します。
+
 フロントとバックエンドを**同一ドメインの `/task-board/` 配下**にまとめる構成です。同一オリジンになるためCORSは実質不要で、設定もシンプルです。
 
 サーバー（`public_html` など）に、次のレイアウトになるようアップロードします。

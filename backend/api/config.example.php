@@ -14,8 +14,10 @@ define('DB_PASS', 'your_db_password');
 define('DB_CHARSET', 'utf8mb4');
 
 // ---- CORS 設定 ----
-// 本番は同一オリジン配信（例: https://example.com/task-board/）ならCORSは基本不要だが、
-// 別オリジンから叩くケースに備えて本番ドメインと開発用オリジンを許可しておく。
+// ★【要変更】'https://example.com' を、あなたのサイトのドメインに書き換えてください。
+//   （例: https://your-domain.example / https://tomoyuki.org など、実際に設置するオリジン）
+// 本番はフロントとバックを同一オリジンの /task-board/ 配下に置く想定でCORSは基本不要ですが、
+// 別オリジンから叩くケースに備えて本番ドメインと開発用オリジン（Vite）を許可しておきます。
 define('CORS_ALLOWED_ORIGINS', 'https://example.com,http://localhost:5173,http://127.0.0.1:5173');
 
 // ---- レート制限 ----

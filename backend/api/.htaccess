@@ -1,0 +1,17 @@
+# api/ ディレクトリ用の保護設定。
+# tasks.php / notes.php / projects.php 以外（DB接続情報や共通ライブラリ）への
+# ブラウザからの直接アクセスを拒否する。
+
+Options -Indexes
+
+<FilesMatch "\.example\.php$">
+    Require all denied
+</FilesMatch>
+
+<Files "config.php">
+    Require all denied
+</Files>
+
+<Files "bootstrap.php">
+    Require all denied
+</Files>

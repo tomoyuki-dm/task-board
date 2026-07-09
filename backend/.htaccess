@@ -1,0 +1,39 @@
+# タスク分担掲示板 ルート（task-board/）用 Apache 設定
+# ※デプロイ時はこのファイルを task-board/.htaccess として配置する。
+#   フロント(SPA)のルーティングと、機密ファイルの保護を兼ねる。
+
+# ディレクトリ一覧の表示を無効化
+Options -Indexes
+
+# UTF-8 をデフォルトに
+AddDefaultCharset UTF-8
+
+# 機密ファイル・設定ファイルへの直接アクセスを拒否
+<FilesMatch "\.(sql|md|example\.php)$">
+    Require all denied
+</FilesMatch>
+<Files "config.php">
+    Require all denied
+</Files>
+<Files "bootstrap.php">
+    Require all denied
+</Files>
+
+# ---- SPA ルーティング ----
+# /task-board/<projectKey> や /task-board/project-new のような
+# 実ファイルの無いパスは index.html（SPA）にフォールバックさせる。
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /task-board/
+
+    # 実在するファイル・ディレクトリはそのまま配信（index.html, assets/, api/*.php 等）
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # API は書き換えない
+    RewriteRule ^api/ - [L]
+
+    # それ以外はすべて SPA のエントリへ
+    RewriteRule ^ index.html [L]
+</IfModule>

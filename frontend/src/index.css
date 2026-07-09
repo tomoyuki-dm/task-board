@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* 黒板のテクスチャ（濃い緑にうっすらチョークの粉／ムラを重ねる） */
+  .chalkboard-bg {
+    background-color: #2f4739;
+    background-image:
+      radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.05) 0, transparent 34%),
+      radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.04) 0, transparent 30%),
+      radial-gradient(circle at 68% 78%, rgba(255, 255, 255, 0.05) 0, transparent 38%),
+      radial-gradient(circle at 30% 88%, rgba(255, 255, 255, 0.035) 0, transparent 32%),
+      linear-gradient(160deg, #33503f 0%, #2b4235 55%, #24382c 100%);
+  }
+
+  /* チョーク文字（ほのかな発光とにじみ） */
+  .chalk-text {
+    color: #f4f1e9;
+    text-shadow:
+      0 0 1px rgba(255, 255, 255, 0.35),
+      0 1px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  .chalk-text-muted {
+    color: rgba(244, 241, 233, 0.72);
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  /* 付箋の紙感（軽い影とめくれ） */
+  .sticky-note {
+    box-shadow:
+      0 1px 1px rgba(0, 0, 0, 0.18),
+      0 6px 10px rgba(0, 0, 0, 0.22);
+  }
+}

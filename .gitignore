@@ -1,0 +1,14 @@
+# --- backend ---
+backend/api/config.php
+
+# --- frontend ---
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# --- misc ---
+.DS_Store
+*.log
+npm-debug.log*
+*.tsbuildinfo

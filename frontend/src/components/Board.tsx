@@ -32,7 +32,7 @@ export default function Board({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 min-[1600px]:grid-cols-3">
       {tasks.map((task, index) => (
         <TaskCard
           key={task.id}

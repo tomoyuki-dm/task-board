@@ -1,5 +1,6 @@
 import type { Task, Note } from '../types'
 import StickyNote from './StickyNote'
+import Linkify from './Linkify'
 
 interface Props {
   task: Task
@@ -81,7 +82,7 @@ export default function TaskCard({
 
       {task.description && (
         <p className="chalk-text-muted mb-3 whitespace-pre-line font-chalk text-lg leading-snug break-words">
-          {task.description}
+          <Linkify text={task.description} />
         </p>
       )}
 

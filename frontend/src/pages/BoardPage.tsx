@@ -9,6 +9,7 @@ import TaskForm from '../components/TaskForm'
 import NoteForm from '../components/NoteForm'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ShareBar from '../components/ShareBar'
+import Linkify from '../components/Linkify'
 
 // 一覧の自動更新間隔（ミリ秒）
 const POLL_INTERVAL = 15000
@@ -227,7 +228,7 @@ export default function BoardPage({ projectKey }: Props) {
           </h1>
           {project?.description && (
             <p className="chalk-text-muted mt-1 whitespace-pre-line break-words font-chalk text-lg">
-              {project.description}
+              <Linkify text={project.description} />
             </p>
           )}
         </div>
